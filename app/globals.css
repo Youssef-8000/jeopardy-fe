@@ -1,5 +1,4 @@
-Updated theme to match authentic Jeopardy - deep blue backgrounds, gold accents, white text
-@import 'tailwindcss';
+@import "tailwindcss";
 
 * {
   margin: 0;
@@ -7,7 +6,8 @@ Updated theme to match authentic Jeopardy - deep blue backgrounds, gold accents,
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #001a4d 0%, #003366 100%);
@@ -81,11 +81,15 @@ body {
   border-color: var(--jeopardy-gold) !important;
 }
 
-.MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+.MuiTextField-root
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
   border-color: var(--jeopardy-gold-dark) !important;
 }
 
-.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+.MuiTextField-root
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
   border-color: var(--jeopardy-gold-dark) !important;
 }
 

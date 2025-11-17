@@ -1,14 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Button, Container, Typography } from '@mui/material';
-import { useAppSelector } from '@/lib/hooks';
-import { AddBoardDialog } from '@/components/add-board-dialog';
-import { BoardCard } from '@/components/board-card';
+import { useState, useEffect } from "react";
+import { Button, Container, Typography } from "@mui/material";
+import { AddBoardDialog } from "@/components/add-board-dialog";
+import { BoardCard } from "@/components/board-card";
+import { fetchBoards } from "@/lib/slices/boardsSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 export default function HostPage() {
   const boards = useAppSelector((state) => state.boards.boards);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchBoards());
+  }, [dispatch]);
 
   return (
     <Container maxWidth="lg" className="py-8">
@@ -16,10 +23,7 @@ export default function HostPage() {
         <Typography variant="h4" component="h1" className="mb-4">
           Jeopardy Boards
         </Typography>
-        <Button
-          variant="contained"
-          onClick={() => setDialogOpen(true)}
-        >
+        <Button variant="contained" onClick={() => setDialogOpen(true)}>
           Add New Board
         </Button>
       </div>

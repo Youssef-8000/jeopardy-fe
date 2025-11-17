@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface GameState {
   currentBoardId: string | null;
@@ -9,6 +9,8 @@ export interface GameState {
     value: number;
     question: string;
     answer: string;
+    type?: string;
+    mediaUrl?: string | null;
   } | null;
   showAnswer: boolean;
   timeRemaining: number;
@@ -26,14 +28,17 @@ const initialState: GameState = {
 };
 
 const gameSlice = createSlice({
-  name: 'game',
+  name: "game",
   initialState,
   reducers: {
     setCurrentBoardId: (state, action: PayloadAction<string>) => {
       state.currentBoardId = action.payload;
       state.answeredClueIds = [];
     },
-    setCurrentClue: (state, action: PayloadAction<GameState['currentClue']>) => {
+    setCurrentClue: (
+      state,
+      action: PayloadAction<GameState["currentClue"]>
+    ) => {
       state.currentClue = action.payload;
       state.showAnswer = false;
       state.isTimerRunning = true;

@@ -1,33 +1,59 @@
-'use client'
+"use client";
 
-import * as CollapsiblePrimitive from '@radix-ui/react-collapsible'
+import * as React from "react";
+import { Collapse } from "@mui/material";
+
+interface CollapsibleProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children?: React.ReactNode;
+}
 
 function Collapsible({
+  open,
+  onOpenChange,
+  children,
   ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
+}: CollapsibleProps) {
+  return (
+    <div data-slot="collapsible" {...props}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          if (child.type === CollapsibleTrigger) {
+            return React.cloneElement(child, {
+              onClick: () => onOpenChange?.(!open),
+            } as any);
+          }
+          if (child.type === CollapsibleContent) {
+            return <Collapse in={open}>{child}</Collapse>;
+          }
+        }
+        return child;
+      })}
+    </div>
+  );
 }
 
 function CollapsibleTrigger({
+  children,
   ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
+}: React.ComponentProps<"button">) {
   return (
-    <CollapsiblePrimitive.CollapsibleTrigger
-      data-slot="collapsible-trigger"
-      {...props}
-    />
-  )
+    <button data-slot="collapsible-trigger" {...props}>
+      {children}
+    </button>
+  );
 }
 
 function CollapsibleContent({
+  children,
   ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
+}: React.ComponentProps<"div">) {
   return (
-    <CollapsiblePrimitive.CollapsibleContent
-      data-slot="collapsible-content"
-      {...props}
-    />
-  )
+    <div data-slot="collapsible-content" {...props}>
+      {children}
+    </div>
+  );
 }
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent }
+export { Collapsible, CollapsibleTrigger, CollapsibleContent };
