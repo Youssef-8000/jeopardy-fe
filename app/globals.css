@@ -1,0 +1,121 @@
+Updated theme to match authentic Jeopardy - deep blue backgrounds, gold accents, white text
+@import 'tailwindcss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #001a4d 0%, #003366 100%);
+  color: #ffffff;
+}
+
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Jeopardy Theme Design Tokens */
+:root {
+  --jeopardy-navy: #001a4d;
+  --jeopardy-navy-light: #003366;
+  --jeopardy-gold: #d4af37;
+  --jeopardy-gold-dark: #b8941f;
+  --jeopardy-white: #ffffff;
+  --jeopardy-text: #ffffff;
+  --jeopardy-border: #d4af37;
+}
+
+/* Override MUI theme colors */
+.MuiAppBar-root {
+  background-color: var(--jeopardy-navy) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border-bottom: 3px solid var(--jeopardy-gold);
+}
+
+.MuiButton-root {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.MuiButton-contained {
+  background-color: var(--jeopardy-gold) !important;
+  color: var(--jeopardy-navy) !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: var(--jeopardy-gold-dark) !important;
+}
+
+.MuiButton-outlined {
+  border-color: var(--jeopardy-gold) !important;
+  color: var(--jeopardy-gold) !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: rgba(212, 175, 55, 0.1);
+  border-color: var(--jeopardy-gold-dark) !important;
+}
+
+.MuiCard-root {
+  background-color: var(--jeopardy-navy-light);
+  border: 2px solid var(--jeopardy-border);
+  color: var(--jeopardy-white);
+}
+
+.MuiDialog-root .MuiPaper-root {
+  background-color: var(--jeopardy-navy);
+  color: var(--jeopardy-white);
+  border: 2px solid var(--jeopardy-gold);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+  color: var(--jeopardy-white);
+}
+
+.MuiTextField-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jeopardy-gold) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jeopardy-gold-dark) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jeopardy-gold-dark) !important;
+}
+
+.MuiInputBase-input::placeholder {
+  color: rgba(212, 175, 55, 0.7) !important;
+  opacity: 1;
+}
+
+.MuiInputBase-input {
+  color: var(--jeopardy-white) !important;
+}
+
+.MuiFormLabel-root {
+  color: var(--jeopardy-gold) !important;
+}
+
+.MuiDialog-paper {
+  min-width: 400px;
+}
+
+/* Updated board container styling for proper grid display */
+.board-grid {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(6, 1fr);
+  background-color: #001a4d;
+  padding: 20px;
+  border: 3px solid #d4af37;
+}
+
+.board-grid > * {
+  gap: 0 !important;
+}
