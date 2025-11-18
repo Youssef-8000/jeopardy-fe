@@ -69,11 +69,10 @@ export default function PlayPage() {
       </Container>
     );
   }
-  console.log("board", board);
   return (
     <>
       <PlayBoard board={board} />
-      {currentClue && <ClueDisplay onBack={() => {}} />}
+      <ClueDisplay onBack={() => {}} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Card, CardContent, Button, Typography, Box } from "@mui/material";
+import { Dialog, DialogContent, Button, Typography, Box } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   setShowAnswer,
@@ -9,10 +9,6 @@ import {
   resetCurrentClue,
   markClueAsAnswered,
 } from "@/lib/slices/gameSlice";
-
-interface ClueDisplayProps {
-  onBack: () => void;
-}
 
 // Declare YouTube IFrame API types
 declare global {
@@ -39,6 +35,10 @@ function getYouTubeVideoId(url: string | null | undefined): string | null {
   }
 
   return null;
+}
+
+interface ClueDisplayProps {
+  onBack: () => void;
 }
 
 export function ClueDisplay({ onBack }: ClueDisplayProps) {
@@ -87,8 +87,11 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
         videoId: videoId,
         playerVars: {
           autoplay: 0,
-          controls: 1,
+          controls: 0,
+          disablekb: 1,
+          enablejsapi: 1,
           rel: 0,
+          modestbranding: 1,
         },
         events: {
           onReady: () => {
@@ -134,8 +137,6 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     };
   }, [currentClue]);
 
-  if (!currentClue) return null;
-
   const handleBack = () => {
     if (playerRef.current) {
       try {
@@ -147,13 +148,15 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     if (stopTimerRef.current) {
       clearTimeout(stopTimerRef.current);
     }
-    dispatch(markClueAsAnswered(currentClue.clueId));
+    if (currentClue) {
+      dispatch(markClueAsAnswered(currentClue.clueId));
+    }
     dispatch(resetCurrentClue());
     onBack();
   };
 
-  const isMediaClue = currentClue.type && currentClue.type !== "text";
-  const youtubeVideoId = getYouTubeVideoId(currentClue.mediaUrl);
+  const isMediaClue = currentClue?.type && currentClue.type !== "text";
+  const youtubeVideoId = getYouTubeVideoId(currentClue?.mediaUrl);
 
   const handlePlaySegment = (endSeconds: number) => {
     if (!playerRef.current || !isPlayerReady) return;
@@ -184,88 +187,124 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     }
   };
 
+  const open = !!currentClue;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl">
-        <CardContent className="flex flex-col gap-6 p-8">
-          {/* Timer */}
-          <div className="text-center">
-            <Typography variant="h6" color="textSecondary" className="mb-2">
-              Time Remaining
-            </Typography>
-            <Typography
-              variant="h2"
-              className={`font-bold ${
-                timeRemaining <= 5 ? "text-red-600" : "text-blue-600"
-              }`}
-            >
-              {timeRemaining}s
-            </Typography>
-          </div>
+    <Dialog
+      open={open}
+      onClose={handleBack}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
+          bgcolor: "background.paper",
+        },
+      }}
+    >
+      <DialogContent
+        sx={{
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+        {currentClue && (
+          <>
+            {/* Timer */}
+            <div className="text-center">
+              <Typography variant="h6" color="textSecondary" className="mb-2">
+                Time Remaining
+              </Typography>
+              <Typography
+                variant="h2"
+                className={`font-bold ${
+                  timeRemaining <= 5 ? "text-red-600" : "text-blue-600"
+                }`}
+              >
+                {timeRemaining}s
+              </Typography>
+            </div>
 
-          {/* Clue Value */}
-          <div className="text-center">
-            <Typography variant="body2" color="textSecondary">
-              Points
-            </Typography>
-            <Typography variant="h4" className="font-bold">
-              ${currentClue.value}
-            </Typography>
-          </div>
+            {/* Clue Value */}
+            <div className="text-center">
+              <Typography variant="body2" color="textSecondary">
+                Points
+              </Typography>
+              <Typography variant="h4" className="font-bold">
+                ${currentClue.value}
+              </Typography>
+            </div>
 
-          {/* Media Content or Question/Answer */}
-          {isMediaClue && youtubeVideoId ? (
-            <Box className="flex flex-col gap-4">
-              {/* YouTube Video */}
-              <Box className="relative w-full" sx={{ paddingTop: "56.25%" }}>
-                <div
-                  ref={playerDivRef}
-                  className="absolute top-0 left-0 w-full h-full rounded"
-                />
-              </Box>
-
-              {/* Playback Control Buttons */}
-              {!showAnswer && (
-                <Box className="flex gap-2 justify-center flex-wrap">
-                  <Button
-                    variant="outlined"
-                    onClick={() => handlePlaySegment(1)}
-                    sx={{ minWidth: "60px" }}
-                  >
-                    1s
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handlePlaySegment(3)}
-                    sx={{ minWidth: "60px" }}
-                  >
-                    3s
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handlePlaySegment(5)}
-                    sx={{ minWidth: "60px" }}
-                  >
-                    5s
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handlePlaySegment(10)}
-                    sx={{ minWidth: "60px" }}
-                  >
-                    10s
-                  </Button>
+            {/* Media Content or Question/Answer */}
+            {isMediaClue && youtubeVideoId ? (
+              <Box className="flex flex-col gap-4">
+                {/* Question or Answer */}
+                <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
+                  {!showAnswer ? (
+                    currentClue.question && (
+                      <Typography variant="h5" className="text-center">
+                        {currentClue.question}
+                      </Typography>
+                    )
+                  ) : (
+                    <Typography
+                      variant="h4"
+                      className="text-center font-bold text-green-600"
+                    >
+                      {currentClue.answer}
+                    </Typography>
+                  )}
                 </Box>
-              )}
+                {/* YouTube Video */}
+                <Box className="relative w-full" sx={{ paddingTop: "56.25%" }}>
+                  <div
+                    ref={playerDivRef}
+                    className="absolute top-0 left-0 w-full h-full rounded"
+                    style={{ pointerEvents: "none" }}
+                  />
+                </Box>
 
-              {/* Question or Answer */}
+                {/* Playback Control Buttons */}
+                {!showAnswer && (
+                  <Box className="flex gap-2 justify-center flex-wrap">
+                    <Button
+                      variant="outlined"
+                      onClick={() => handlePlaySegment(1)}
+                      sx={{ minWidth: "60px" }}
+                    >
+                      1s
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handlePlaySegment(3)}
+                      sx={{ minWidth: "60px" }}
+                    >
+                      3s
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handlePlaySegment(5)}
+                      sx={{ minWidth: "60px" }}
+                    >
+                      5s
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handlePlaySegment(10)}
+                      sx={{ minWidth: "60px" }}
+                    >
+                      10s
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            ) : (
               <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
                 {!showAnswer ? (
-                  currentClue.question && (
-                    <Typography variant="h5" className="text-center">
-                      {currentClue.question}
-                    </Typography>
-                  )
+                  <Typography variant="h5" className="text-center">
+                    {currentClue.question}
+                  </Typography>
                 ) : (
                   <Typography
                     variant="h4"
@@ -275,47 +314,32 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
                   </Typography>
                 )}
               </Box>
-            </Box>
-          ) : (
-            <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
-              {!showAnswer ? (
-                <Typography variant="h5" className="text-center">
-                  {currentClue.question}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="h4"
-                  className="text-center font-bold text-green-600"
-                >
-                  {currentClue.answer}
-                </Typography>
-              )}
-            </Box>
-          )}
-
-          {/* Controls */}
-          <div className="flex gap-4 justify-center">
-            {!showAnswer ? (
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => dispatch(setShowAnswer(true))}
-              >
-                Reveal Answer
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="success"
-                size="large"
-                onClick={handleBack}
-              >
-                Back to Board
-              </Button>
             )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+
+            {/* Controls */}
+            <div className="flex gap-4 justify-center">
+              {!showAnswer ? (
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => dispatch(setShowAnswer(true))}
+                >
+                  Reveal Answer
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="large"
+                  onClick={handleBack}
+                >
+                  Back to Board
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
