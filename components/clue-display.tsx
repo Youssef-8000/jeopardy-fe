@@ -47,8 +47,11 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     useAppSelector((state) => state.game);
   const playerRef = useRef<any>(null);
   const playerDivRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const stopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!isTimerRunning || !currentClue) return;
@@ -60,20 +63,16 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     return () => clearInterval(interval);
   }, [isTimerRunning, timeRemaining, dispatch, currentClue]);
 
-  // Load YouTube IFrame API
+  // Load YouTube IFrame API (for YouTube videos and audio with YouTube URLs)
   useEffect(() => {
-    const isMediaClue = currentClue?.type && currentClue.type !== "text";
     const youtubeVideoId = getYouTubeVideoId(currentClue?.mediaUrl);
+    const isYouTubeMedia =
+      (currentClue?.type === "video" || currentClue?.type === "audio") &&
+      youtubeVideoId !== null;
 
-    if (!isMediaClue || !youtubeVideoId || !playerDivRef.current) {
+    if (!isYouTubeMedia || !youtubeVideoId) {
       setIsPlayerReady(false);
-      return;
-    }
-
-    const initializePlayer = (videoId: string) => {
-      if (!playerDivRef.current) return;
-
-      // Destroy existing player if any
+      // Clean up if we had a player
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
@@ -82,45 +81,83 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
         }
         playerRef.current = null;
       }
-
-      playerRef.current = new window.YT.Player(playerDivRef.current, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          enablejsapi: 1,
-          rel: 0,
-          modestbranding: 1,
-        },
-        events: {
-          onReady: () => {
-            setIsPlayerReady(true);
-          },
-        },
-      });
-    };
-
-    // Check if API is already loaded
-    if (window.YT && window.YT.Player) {
-      initializePlayer(youtubeVideoId);
       return;
     }
 
-    // Load the IFrame Player API code asynchronously
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    // Wait for the div to be available
+    const checkAndInitialize = () => {
+      if (!playerDivRef.current) {
+        // Retry after a short delay if div isn't ready
+        retryTimeoutRef.current = setTimeout(checkAndInitialize, 100);
+        return;
+      }
 
-    // Set up callback when API is ready
-    const originalCallback = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      if (originalCallback) originalCallback();
-      initializePlayer(youtubeVideoId);
+      const initializePlayer = (videoId: string) => {
+        if (!playerDivRef.current) return;
+
+        // Destroy existing player if any
+        if (playerRef.current) {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            // Ignore errors
+          }
+          playerRef.current = null;
+        }
+
+        // For audio type, hide video; for video type, hide controls initially
+        const isAudioType = currentClue?.type === "audio";
+
+        playerRef.current = new window.YT.Player(playerDivRef.current, {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 0,
+            controls: 0, // Always hide controls, we'll use custom buttons
+            disablekb: 1,
+            enablejsapi: 1,
+            rel: 0,
+            modestbranding: 1,
+            // For audio, try to minimize video display
+            ...(isAudioType && {
+              iv_load_policy: 3, // Hide annotations
+              modestbranding: 1,
+            }),
+          },
+          events: {
+            onReady: () => {
+              setIsPlayerReady(true);
+            },
+          },
+        });
+      };
+
+      // Check if API is already loaded
+      if (window.YT && window.YT.Player) {
+        initializePlayer(youtubeVideoId);
+        return;
+      }
+
+      // Load the IFrame Player API code asynchronously
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      // Set up callback when API is ready
+      const originalCallback = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (originalCallback) originalCallback();
+        initializePlayer(youtubeVideoId);
+      };
     };
 
+    checkAndInitialize();
+
     return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
@@ -145,6 +182,14 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
         // Ignore errors
       }
     }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
     if (stopTimerRef.current) {
       clearTimeout(stopTimerRef.current);
     }
@@ -156,7 +201,13 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
   };
 
   const isMediaClue = currentClue?.type && currentClue.type !== "text";
-  const youtubeVideoId = getYouTubeVideoId(currentClue?.mediaUrl);
+  const mediaType = currentClue?.type;
+  const mediaUrl = currentClue?.mediaUrl;
+  const youtubeVideoId = getYouTubeVideoId(mediaUrl);
+  const isYouTubeMedia =
+    (mediaType === "video" || mediaType === "audio") && youtubeVideoId !== null;
+  const isYouTubeVideo = mediaType === "video" && youtubeVideoId !== null;
+  const isYouTubeAudio = mediaType === "audio" && youtubeVideoId !== null;
 
   const handlePlaySegment = (endSeconds: number) => {
     if (!playerRef.current || !isPlayerReady) return;
@@ -237,13 +288,16 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
             </div>
 
             {/* Media Content or Question/Answer */}
-            {isMediaClue && youtubeVideoId ? (
+            {isMediaClue && mediaUrl ? (
               <Box className="flex flex-col gap-4">
                 {/* Question or Answer */}
                 <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
                   {!showAnswer ? (
                     currentClue.question && (
-                      <Typography variant="h5" className="text-center">
+                      <Typography
+                        variant="h5"
+                        className="text-center text-black"
+                      >
                         {currentClue.question}
                       </Typography>
                     )
@@ -256,53 +310,166 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
                     </Typography>
                   )}
                 </Box>
-                {/* YouTube Video */}
-                <Box className="relative w-full" sx={{ paddingTop: "56.25%" }}>
-                  <div
-                    ref={playerDivRef}
-                    className="absolute top-0 left-0 w-full h-full rounded"
-                    style={{ pointerEvents: "none" }}
-                  />
-                </Box>
 
-                {/* Playback Control Buttons */}
-                {!showAnswer && (
-                  <Box className="flex gap-2 justify-center flex-wrap">
-                    <Button
-                      variant="outlined"
-                      onClick={() => handlePlaySegment(1)}
-                      sx={{ minWidth: "60px" }}
+                {/* Media Display */}
+                {mediaType === "image" && (
+                  <Box className="w-full flex justify-center">
+                    <img
+                      src={mediaUrl}
+                      alt="Clue image"
+                      className="max-w-full max-h-96 rounded object-contain"
+                      style={{ maxHeight: "400px" }}
+                    />
+                  </Box>
+                )}
+
+                {/* Audio with YouTube URL */}
+                {isYouTubeAudio && (
+                  <>
+                    {/* Hidden YouTube player (audio only) - must be in DOM but invisible */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        left: "-9999px",
+                        width: "320px",
+                        height: "180px",
+                        overflow: "hidden",
+                        opacity: 0,
+                        pointerEvents: "none",
+                        zIndex: -1,
+                      }}
                     >
-                      1s
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handlePlaySegment(3)}
-                      sx={{ minWidth: "60px" }}
+                      <div
+                        ref={playerDivRef}
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    </Box>
+
+                    {/* Audio Player UI */}
+                    <Box className="w-full flex flex-col items-center gap-4">
+                      <Box className="w-full max-w-md bg-gray-100 rounded-lg p-6 flex items-center justify-center min-h-[80px]">
+                        <Typography variant="h6" color="textSecondary">
+                          🎵 Audio Player
+                        </Typography>
+                      </Box>
+
+                      {/* Playback Control Buttons */}
+                      {!showAnswer && (
+                        <Box className="flex gap-2 justify-center flex-wrap">
+                          <Button
+                            variant="outlined"
+                            onClick={() => handlePlaySegment(1)}
+                            sx={{ minWidth: "60px" }}
+                          >
+                            1s
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={() => handlePlaySegment(3)}
+                            sx={{ minWidth: "60px" }}
+                          >
+                            3s
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={() => handlePlaySegment(5)}
+                            sx={{ minWidth: "60px" }}
+                          >
+                            5s
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={() => handlePlaySegment(10)}
+                            sx={{ minWidth: "60px" }}
+                          >
+                            10s
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  </>
+                )}
+
+                {/* Audio with non-YouTube URL */}
+                {mediaType === "audio" && !isYouTubeAudio && (
+                  <Box className="w-full flex justify-center">
+                    <audio
+                      ref={audioRef}
+                      src={mediaUrl}
+                      controls
+                      className="w-full max-w-md"
+                    />
+                  </Box>
+                )}
+
+                {/* Video with YouTube URL */}
+                {isYouTubeVideo && (
+                  <>
+                    {/* YouTube Video */}
+                    <Box
+                      className="relative w-full"
+                      sx={{ paddingTop: "56.25%" }}
                     >
-                      3s
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handlePlaySegment(5)}
-                      sx={{ minWidth: "60px" }}
-                    >
-                      5s
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handlePlaySegment(10)}
-                      sx={{ minWidth: "60px" }}
-                    >
-                      10s
-                    </Button>
+                      <div
+                        ref={playerDivRef}
+                        className="absolute top-0 left-0 w-full h-full rounded"
+                        style={{ pointerEvents: "none" }}
+                      />
+                    </Box>
+
+                    {/* Playback Control Buttons */}
+                    {!showAnswer && (
+                      <Box className="flex gap-2 justify-center flex-wrap">
+                        <Button
+                          variant="outlined"
+                          onClick={() => handlePlaySegment(1)}
+                          sx={{ minWidth: "60px" }}
+                        >
+                          1s
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={() => handlePlaySegment(3)}
+                          sx={{ minWidth: "60px" }}
+                        >
+                          3s
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={() => handlePlaySegment(5)}
+                          sx={{ minWidth: "60px" }}
+                        >
+                          5s
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={() => handlePlaySegment(10)}
+                          sx={{ minWidth: "60px" }}
+                        >
+                          10s
+                        </Button>
+                      </Box>
+                    )}
+                  </>
+                )}
+
+                {/* Video with non-YouTube URL */}
+                {mediaType === "video" && !isYouTubeVideo && (
+                  <Box className="w-full flex justify-center">
+                    <video
+                      ref={videoRef}
+                      src={mediaUrl}
+                      controls
+                      className="w-full max-w-4xl rounded"
+                      style={{ maxHeight: "500px" }}
+                    />
                   </Box>
                 )}
               </Box>
             ) : (
               <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
                 {!showAnswer ? (
-                  <Typography variant="h5" className="text-center">
+                  <Typography variant="h5" className="text-center text-black">
                     {currentClue.question}
                   </Typography>
                 ) : (
