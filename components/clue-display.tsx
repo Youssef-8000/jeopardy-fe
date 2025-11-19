@@ -65,7 +65,13 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     if (!isTimerRunning || !currentClue) return;
 
     const interval = setInterval(() => {
-      dispatch(setTimeRemaining(Math.max(0, timeRemaining - 1)));
+      const newTime = Math.max(0, timeRemaining - 1);
+      dispatch(setTimeRemaining(newTime));
+
+      // When timer reaches 0, stop the timer and reset to button
+      if (newTime === 0) {
+        dispatch(setIsTimerRunning(false));
+      }
     }, 1000);
 
     return () => clearInterval(interval);
