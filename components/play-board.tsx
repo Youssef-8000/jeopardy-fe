@@ -106,29 +106,66 @@ export function PlayBoard({ board }: PlayBoardProps) {
       })
     );
     dispatch(setTimeRemaining(timeLimit));
-    dispatch(setIsTimerRunning(true));
   };
 
   return (
-    <Container maxWidth={false} className="py-8 px-4">
-      <Typography variant="h4" component="h1" className="mb-8 text-center">
+    <Container
+      maxWidth={false}
+      className="py-6 px-6 h-[calc(100vh-80px)] flex flex-col overflow-auto"
+    >
+      <Typography
+        variant="h3"
+        component="h1"
+        className="!mb-6 text-center font-bold"
+        sx={{
+          background: "linear-gradient(135deg, #f4c542 0%, #ffd966 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          fontSize: { xs: "1.75rem", md: "2rem" },
+          textShadow: "0 2px 12px rgba(244, 197, 66, 0.25)",
+        }}
+      >
         {board.title}
       </Typography>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto flex-1 flex items-start justify-center pb-6">
         <div
-          className="grid gap-2 min-w-full"
+          className="grid gap-3 mx-auto"
           style={{
             gridTemplateColumns: `repeat(6, minmax(150px, 1fr))`,
+            maxWidth: "1400px",
           }}
         >
           {clueGrid.map(({ category, cluesByPosition }) => (
-            <div key={category.id} className="flex flex-col gap-2">
+            <div key={category.id} className="flex flex-col gap-3">
               {/* Category Header */}
               {category.title && (
-                <Card className="bg-blue-600 text-white">
-                  <CardContent className="py-3 px-2 text-center">
-                    <Typography variant="subtitle2" className="font-bold">
+                <Card
+                  sx={{
+                    background: "#010b78",
+                    border: "none",
+                    boxShadow: "none",
+                    borderRadius: "2px",
+                    minHeight: "80px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CardContent className="!p-4 text-center">
+                    <Typography
+                      variant="subtitle1"
+                      className="font-bold"
+                      sx={{
+                        color: "#FFFFFF",
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                      }}
+                    >
                       {category.title}
                     </Typography>
                   </CardContent>
@@ -142,15 +179,21 @@ export function PlayBoard({ board }: PlayBoardProps) {
                   return (
                     <Button
                       key={`empty-${index}`}
-                      variant="outlined"
                       disabled
-                      className="h-16 flex flex-col items-center justify-center"
+                      className="h-20 flex flex-col items-center justify-center"
                       sx={{
-                        backgroundColor: "#e0e0e0",
-                        color: "#999",
+                        background: "#0A0EAF",
+                        border: "none",
+                        color: "rgba(255, 200, 0, 0.2)",
+                        borderRadius: "2px",
+                        boxShadow: "none",
+                        "&:disabled": {
+                          background: "#0A0EAF",
+                          border: "none",
+                        },
                       }}
                     >
-                      <span className="text-lg font-bold">-</span>
+                      <span className="text-base font-bold">-</span>
                     </Button>
                   );
                 }
@@ -160,21 +203,35 @@ export function PlayBoard({ board }: PlayBoardProps) {
                 return (
                   <Button
                     key={clue.id}
-                    variant={isAnswered ? "outlined" : "contained"}
-                    color={isAnswered ? "inherit" : "primary"}
                     onClick={() => handleClueClick(category.id, clue.id)}
                     disabled={isAnswered}
-                    className="h-16 flex flex-col items-center justify-center"
+                    className="h-20 flex flex-col items-center justify-center"
                     sx={{
-                      backgroundColor: isAnswered ? "#e0e0e0" : "#1976d2",
-                      color: isAnswered ? "#999" : "white",
+                      background: isAnswered ? "#05076B" : "#0A0EAF",
+                      color: isAnswered ? "rgba(255, 200, 0, 0.3)" : "#FFCC00",
+                      border: "none",
+                      borderRadius: "2px",
+                      fontSize: "1.8rem",
+                      fontWeight: 900,
+                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                      transition: "all 0.15s ease",
+                      boxShadow: "none",
+                      textShadow: isAnswered
+                        ? "none"
+                        : "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      letterSpacing: "1px",
+                      "&:hover": {
+                        transform: isAnswered ? "none" : "scale(1.02)",
+                        background: isAnswered ? "#05076B" : "#0C11D4",
+                      },
                       "&:disabled": {
-                        backgroundColor: "#e0e0e0",
-                        color: "#999",
+                        background: "#05076B",
+                        color: "rgba(255, 200, 0, 0.3)",
+                        border: "none",
                       },
                     }}
                   >
-                    <span className="text-lg font-bold">${clue.value}</span>
+                    <span>${clue.value}</span>
                   </Button>
                 );
               })}

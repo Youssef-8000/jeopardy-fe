@@ -52,36 +52,46 @@ export function CategoryColumn({
   console.log("cluesToShow", cluesToShow);
   return (
     <>
-      <div className="flex flex-col gap-0">
+      <div className="flex flex-col gap-2.5">
         <Button
           onClick={() => setEditDialogOpen(true)}
           className="!p-0 h-auto"
           fullWidth
           sx={{
+            borderRadius: "10px",
+            overflow: "hidden",
             "&:hover": {
-              backgroundColor: "rgba(212, 175, 55, 0.3)",
+              transform: "translateY(-2px)",
             },
+            transition: "all 0.3s ease",
           }}
         >
           <Card
-            className="w-full cursor-pointer transition-colors"
+            className="w-full cursor-pointer"
             sx={{
-              backgroundColor: "#1a3a70",
-              color: "#ffffff",
-              minHeight: "70px",
+              background: "#0A0EAF",
+              color: "#FFFFFF",
+              minHeight: "65px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: 0,
-              border: "2px solid #d4af37",
+              borderRadius: "2px",
+              border: "none",
               margin: 0,
+              boxShadow: "none",
             }}
           >
-            <CardContent className="py-2 px-3 text-center w-full">
+            <CardContent className="py-3 px-2 text-center w-full">
               <Typography
                 variant="h6"
-                className="font-bold uppercase"
-                sx={{ fontSize: "1rem", letterSpacing: "2px", fontWeight: 900 }}
+                className="font-bold"
+                sx={{ 
+                  fontSize: "0.85rem", 
+                  letterSpacing: "0.5px", 
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                }}
               >
                 {category.title}
               </Typography>

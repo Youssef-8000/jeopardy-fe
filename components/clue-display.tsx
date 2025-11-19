@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   setShowAnswer,
   setTimeRemaining,
+  setIsTimerRunning,
   resetCurrentClue,
   markClueAsAnswered,
 } from "@/lib/slices/gameSlice";
@@ -45,6 +46,13 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
   const dispatch = useAppDispatch();
   const { currentClue, showAnswer, timeRemaining, isTimerRunning } =
     useAppSelector((state) => state.game);
+  const boardFromList = useAppSelector((state) =>
+    currentClue
+      ? state.boards.boards.find((b) => String(b.id) === currentClue.boardId)
+      : null
+  );
+  const currentBoard = useAppSelector((state) => state.boards.currentBoard);
+  const board = boardFromList || currentBoard;
   const playerRef = useRef<any>(null);
   const playerDivRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -248,55 +256,108 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
       fullWidth
       PaperProps={{
         sx: {
-          bgcolor: "background.paper",
+          bgcolor: "var(--jeopardy-navy-light)",
+          borderRadius: "4px",
+          border: "none",
         },
       }}
     >
       <DialogContent
         sx={{
-          p: 4,
+          p: { xs: 3, md: 4 },
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          background: "var(--jeopardy-navy-light)",
+          position: "relative",
         }}
       >
         {currentClue && (
           <>
-            {/* Timer */}
-            <div className="text-center">
-              <Typography variant="h6" color="textSecondary" className="mb-2">
-                Time Remaining
-              </Typography>
-              <Typography
-                variant="h2"
-                className={`font-bold ${
-                  timeRemaining <= 5 ? "text-red-600" : "text-blue-600"
-                }`}
+            {/* Start Timer Button - Only show when timer isn't running */}
+            {!isTimerRunning && !showAnswer && (
+              <div
+                className="flex justify-end mb-2"
+                style={{ position: "absolute", top: "16px", right: "16px" }}
               >
-                {timeRemaining}s
-              </Typography>
-            </div>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => {
+                    const timeLimit = board?.timeLimit || 30;
+                    dispatch(setTimeRemaining(timeLimit));
+                    dispatch(setIsTimerRunning(true));
+                  }}
+                  sx={{
+                    fontSize: "1rem",
+                    padding: "12px 48px",
+                    borderRadius: "4px",
+                    textTransform: "none",
+                    background: "#FFCC00",
+                    color: "#000000",
+                    fontWeight: 700,
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    boxShadow: "none",
+                    "&:hover": {
+                      background: "#FFD633",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  Start Timer
+                </Button>
+              </div>
+            )}
 
-            {/* Clue Value */}
-            <div className="text-center">
-              <Typography variant="body2" color="textSecondary">
-                Points
-              </Typography>
-              <Typography variant="h4" className="font-bold">
-                ${currentClue.value}
-              </Typography>
-            </div>
+            {/* Timer Display - Only show when timer is running */}
+            {isTimerRunning && !showAnswer && (
+              <div
+                className="flex justify-end mb-2"
+                style={{ position: "absolute", top: "16px", right: "16px" }}
+              >
+                <div
+                  className="text-center p-4 rounded"
+                  style={{
+                    border: "none",
+                    minWidth: "200px",
+                  }}
+                >
+                  <Typography
+                    variant="h2"
+                    className="font-bold"
+                    sx={{
+                      color: timeRemaining <= 5 ? "#FF6B6B" : "#FFCC00",
+                      fontSize: { xs: "2rem", md: "2.5rem" },
+                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    }}
+                  >
+                    {timeRemaining}s
+                  </Typography>
+                </div>
+              </div>
+            )}
 
             {/* Media Content or Question/Answer */}
             {isMediaClue && mediaUrl ? (
-              <Box className="flex flex-col gap-4">
+              <Box className="flex flex-col gap-3">
                 {/* Question or Answer */}
-                <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
+                <Box
+                  className="rounded p-6 min-h-24 flex items-center justify-center"
+                  sx={{
+                    border: "none",
+                  }}
+                >
                   {!showAnswer ? (
                     currentClue.question && (
                       <Typography
                         variant="h5"
-                        className="text-center text-black"
+                        className="text-center"
+                        sx={{
+                          color: "#FFFFFF",
+                          fontSize: "1.25rem",
+                          fontWeight: 500,
+                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                        }}
                       >
                         {currentClue.question}
                       </Typography>
@@ -304,7 +365,13 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
                   ) : (
                     <Typography
                       variant="h4"
-                      className="text-center font-bold text-green-600"
+                      className="text-center font-bold"
+                      sx={{
+                        color: "#FFCC00",
+                        fontSize: "1.5rem",
+                        fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                        textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+                      }}
                     >
                       {currentClue.answer}
                     </Typography>
@@ -347,10 +414,8 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
 
                     {/* Audio Player UI */}
                     <Box className="w-full flex flex-col items-center gap-4">
-                      <Box className="w-full max-w-md bg-gray-100 rounded-lg p-6 flex items-center justify-center min-h-[80px]">
-                        <Typography variant="h6" color="textSecondary">
-                          🎵 Audio Player
-                        </Typography>
+                      <Box className="w-full max-w-md text-white rounded-lg p-6 flex items-center justify-center min-h-[80px]">
+                        <Typography variant="h6">🎵 Audio Player 🎵</Typography>
                       </Box>
 
                       {/* Playback Control Buttons */}
@@ -467,15 +532,35 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
                 )}
               </Box>
             ) : (
-              <Box className="bg-gray-100 rounded p-6 min-h-32 flex items-center justify-center">
+              <Box
+                className="rounded p-6 min-h-24 flex items-center justify-center"
+                sx={{
+                  border: "none",
+                }}
+              >
                 {!showAnswer ? (
-                  <Typography variant="h5" className="text-center text-black">
+                  <Typography
+                    variant="h5"
+                    className="text-center"
+                    sx={{
+                      color: "#FFFFFF",
+                      fontSize: "1.25rem",
+                      fontWeight: 500,
+                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    }}
+                  >
                     {currentClue.question}
                   </Typography>
                 ) : (
                   <Typography
                     variant="h4"
-                    className="text-center font-bold text-green-600"
+                    className="text-center font-bold"
+                    sx={{
+                      color: "#FFCC00",
+                      fontSize: "1.5rem",
+                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                      textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+                    }}
                   >
                     {currentClue.answer}
                   </Typography>
@@ -484,21 +569,49 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
             )}
 
             {/* Controls */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center mt-2">
               {!showAnswer ? (
                 <Button
                   variant="contained"
                   size="large"
                   onClick={() => dispatch(setShowAnswer(true))}
+                  sx={{
+                    fontSize: "1rem",
+                    padding: "12px 48px",
+                    borderRadius: "4px",
+                    textTransform: "none",
+                    background: "#FFCC00",
+                    color: "#000000",
+                    fontWeight: 700,
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    boxShadow: "none",
+                    "&:hover": {
+                      background: "#FFD633",
+                      boxShadow: "none",
+                    },
+                  }}
                 >
                   Reveal Answer
                 </Button>
               ) : (
                 <Button
                   variant="contained"
-                  color="success"
                   size="large"
                   onClick={handleBack}
+                  sx={{
+                    fontSize: "1rem",
+                    padding: "12px 48px",
+                    borderRadius: "4px",
+                    textTransform: "none",
+                    color: "#FFFFFF",
+                    fontWeight: 700,
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    boxShadow: "none",
+                    "&:hover": {
+                      background: "#0C11D4",
+                      boxShadow: "none",
+                    },
+                  }}
                 >
                   Back to Board
                 </Button>

@@ -1,100 +1,132 @@
 @import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #0a1628 0%, #1a2f4a 50%, #0f1c2e 100%);
+    color: #ffffff;
+  }
+
+  body {
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  /* Modern Jeopardy Theme Design Tokens */
+  :root {
+    --jeopardy-navy: #0a1628;
+    --jeopardy-navy-light: #1a2f4a;
+    --jeopardy-navy-lighter: #2a3f5a;
+    --jeopardy-gold: #f4c542;
+    --jeopardy-gold-dark: #d4a430;
+    --jeopardy-gold-light: #ffd966;
+    --jeopardy-white: #ffffff;
+    --jeopardy-text: #f0f4f8;
+    --jeopardy-border: #f4c542;
+    --jeopardy-accent: #3b82f6;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(244, 197, 66, 0.3);
+  }
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #001a4d 0%, #003366 100%);
-  color: #ffffff;
-}
-
-body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-}
-
-/* Jeopardy Theme Design Tokens */
-:root {
-  --jeopardy-navy: #001a4d;
-  --jeopardy-navy-light: #003366;
-  --jeopardy-gold: #d4af37;
-  --jeopardy-gold-dark: #b8941f;
-  --jeopardy-white: #ffffff;
-  --jeopardy-text: #ffffff;
-  --jeopardy-border: #d4af37;
-}
-
-/* Override MUI theme colors */
-.MuiAppBar-root {
-  background-color: var(--jeopardy-navy) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border-bottom: 3px solid var(--jeopardy-gold);
+@layer components {
+  /* Override MUI theme colors */
+  .MuiAppBar-root {
+  background: linear-gradient(135deg, rgba(10, 22, 40, 0.95) 0%, rgba(26, 47, 74, 0.95) 100%) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md) !important;
+  border-bottom: 2px solid rgba(244, 197, 66, 0.2);
 }
 
 .MuiButton-root {
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .MuiButton-contained {
-  background-color: var(--jeopardy-gold) !important;
+  background: linear-gradient(135deg, var(--jeopardy-gold) 0%, var(--jeopardy-gold-dark) 100%) !important;
   color: var(--jeopardy-navy) !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .MuiButton-contained:hover {
-  background-color: var(--jeopardy-gold-dark) !important;
+  background: linear-gradient(135deg, var(--jeopardy-gold-light) 0%, var(--jeopardy-gold) 100%) !important;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .MuiButton-outlined {
-  border-color: var(--jeopardy-gold) !important;
+  border: 2px solid var(--jeopardy-gold) !important;
   color: var(--jeopardy-gold) !important;
 }
 
 .MuiButton-outlined:hover {
-  background-color: rgba(212, 175, 55, 0.1);
-  border-color: var(--jeopardy-gold-dark) !important;
+  background-color: rgba(244, 197, 66, 0.15);
+  border-color: var(--jeopardy-gold-light) !important;
+  transform: translateY(-1px);
 }
 
 .MuiCard-root {
-  background-color: var(--jeopardy-navy-light);
-  border: 2px solid var(--jeopardy-border);
+  background: linear-gradient(145deg, rgba(26, 47, 74, 0.8) 0%, rgba(42, 63, 90, 0.6) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 197, 66, 0.2);
+  border-radius: 12px;
   color: var(--jeopardy-white);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border-color: rgba(244, 197, 66, 0.4);
 }
 
 .MuiDialog-root .MuiPaper-root {
-  background-color: var(--jeopardy-navy);
+  background: linear-gradient(145deg, var(--jeopardy-navy) 0%, var(--jeopardy-navy-light) 100%);
   color: var(--jeopardy-white);
-  border: 2px solid var(--jeopardy-gold);
+  border: 1px solid rgba(244, 197, 66, 0.3);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
 }
 
 .MuiTextField-root .MuiOutlinedInput-root {
   color: var(--jeopardy-white);
+  border-radius: 8px;
 }
 
 .MuiTextField-root .MuiOutlinedInput-notchedOutline {
-  border-color: var(--jeopardy-gold) !important;
+  border-color: rgba(244, 197, 66, 0.3) !important;
+  transition: all 0.3s ease;
 }
 
 .MuiTextField-root
   .MuiOutlinedInput-root:hover
   .MuiOutlinedInput-notchedOutline {
-  border-color: var(--jeopardy-gold-dark) !important;
+  border-color: rgba(244, 197, 66, 0.5) !important;
 }
 
 .MuiTextField-root
   .MuiOutlinedInput-root.Mui-focused
   .MuiOutlinedInput-notchedOutline {
-  border-color: var(--jeopardy-gold-dark) !important;
+  border-color: var(--jeopardy-gold) !important;
+  box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.1);
 }
 
 .MuiInputBase-input::placeholder {
-  color: rgba(212, 175, 55, 0.7) !important;
+  color: rgba(240, 244, 248, 0.5) !important;
   opacity: 1;
 }
 
@@ -103,7 +135,7 @@ body {
 }
 
 .MuiFormLabel-root {
-  color: var(--jeopardy-gold) !important;
+  color: rgba(244, 197, 66, 0.8) !important;
 }
 
 .MuiDialog-paper {
@@ -113,13 +145,60 @@ body {
 /* Updated board container styling for proper grid display */
 .board-grid {
   display: grid;
-  gap: 0;
+  gap: 4px;
   grid-template-columns: repeat(6, 1fr);
-  background-color: #001a4d;
-  padding: 20px;
-  border: 3px solid #d4af37;
+  background: #000000;
+  padding: 4px;
+  border-radius: 0px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
 }
 
 .board-grid > * {
   gap: 0 !important;
+}
+}
+
+@layer utilities {
+/* Smooth animations and transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(26, 47, 74, 0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 197, 66, 0.5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 197, 66, 0.7);
+}
+
+/* Improved focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--jeopardy-gold);
+  outline-offset: 2px;
+}
 }

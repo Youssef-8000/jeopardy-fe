@@ -41,7 +41,7 @@ const gameSlice = createSlice({
     ) => {
       state.currentClue = action.payload;
       state.showAnswer = false;
-      state.isTimerRunning = true;
+      state.isTimerRunning = false;
     },
     setShowAnswer: (state, action: PayloadAction<boolean>) => {
       state.showAnswer = action.payload;

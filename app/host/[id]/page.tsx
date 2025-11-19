@@ -56,22 +56,50 @@ export default function BoardEditorPage() {
   const { title } = board;
 
   return (
-    <Container maxWidth={false} className="py-8 px-4">
-      <div className="mb-8 flex justify-between items-center">
-        <Typography variant="h4" component="h1" sx={{ color: "#d4af37" }}>
-          {title} - Editor
+    <Container maxWidth={false} className="py-6 px-6 h-[calc(100vh-80px)] flex flex-col overflow-auto">
+      <div className="mb-6 flex justify-between items-center flex-wrap gap-4">
+        <Typography 
+          variant="h3" 
+          component="h1" 
+          className="font-bold"
+          sx={{ 
+            background: "linear-gradient(135deg, #f4c542 0%, #ffd966 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            fontSize: { xs: "1.75rem", md: "2rem" },
+            textShadow: "0 2px 12px rgba(244, 197, 66, 0.25)",
+          }}
+        >
+          {title}
         </Typography>
-        <Button variant="outlined" onClick={() => router.back()}>
-          Back
+        <Button 
+          variant="outlined" 
+          onClick={() => router.back()}
+          sx={{
+            fontSize: "0.95rem",
+            padding: "10px 28px",
+            borderRadius: "10px",
+            borderColor: "rgba(244, 197, 66, 0.5)",
+            color: "#f4c542",
+            fontWeight: 600,
+            "&:hover": {
+              borderColor: "#f4c542",
+              background: "rgba(244, 197, 66, 0.1)",
+            },
+          }}
+        >
+          ← Back
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto flex-1 pb-6">
         <div
-          className="board-grid"
+          className="board-grid mx-auto"
           style={{
-            gap: "0px",
-            gridTemplateColumns: `repeat(6, minmax(140px, 1fr))`,
+            gap: "10px",
+            gridTemplateColumns: `repeat(6, minmax(150px, 1fr))`,
+            maxWidth: "1500px",
           }}
         >
           {categories.map((category, index) => (
