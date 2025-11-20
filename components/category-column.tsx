@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card, CardContent, Typography, Button } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { Category, Clue } from "@/lib/slices/boardsSlice";
 import { ClueCell } from "./clue-cell";
 import { EditCategoryDialog } from "./edit-category-dialog";
@@ -49,54 +49,48 @@ export function CategoryColumn({
 
     return clues;
   }, [category.clues, category.id, clueValues]);
-  console.log("cluesToShow", cluesToShow);
   return (
     <>
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         <Button
           onClick={() => setEditDialogOpen(true)}
-          className="!p-0 h-auto"
+          className="p-0! h-auto"
           fullWidth
           sx={{
-            borderRadius: "10px",
+            borderRadius: "2px",
             overflow: "hidden",
             "&:hover": {
-              transform: "translateY(-2px)",
+              background: "transparent",
             },
-            transition: "all 0.3s ease",
           }}
         >
-          <Card
-            className="w-full cursor-pointer"
+          <Box
+            className="w-full cursor-pointer p-4"
             sx={{
-              background: "#0A0EAF",
+              background: "#010b78",
               color: "#FFFFFF",
-              minHeight: "65px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              height: "90px",
+              maxHeight: "120px",
               borderRadius: "2px",
-              border: "none",
-              margin: 0,
-              boxShadow: "none",
+              overflowY: "auto",
             }}
           >
-            <CardContent className="py-3 px-2 text-center w-full">
-              <Typography
-                variant="h6"
-                className="font-bold"
-                sx={{ 
-                  fontSize: "0.85rem", 
-                  letterSpacing: "0.5px", 
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                }}
-              >
-                {category.title}
-              </Typography>
-            </CardContent>
-          </Card>
+            <Typography
+              variant="subtitle1"
+              className="font-bold"
+              sx={{
+                fontSize: "1rem",
+                letterSpacing: "0.5px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+              }}
+            >
+              {category.title}
+            </Typography>
+          </Box>
         </Button>
         {cluesToShow.map((clue, index) => {
           const isPlaceholder = String(clue.id).startsWith("placeholder-");

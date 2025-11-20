@@ -85,8 +85,26 @@ export function EditCategoryDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: "var(--jeopardy-navy-light)",
+            borderRadius: "4px",
+            border: "none",
+          },
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          color: "var(--jeopardy-white)",
+        }}
+      >
         {isPlaceholder ? "Add Category" : "Edit Category"}
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>

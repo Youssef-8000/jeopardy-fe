@@ -135,8 +135,28 @@ export function AddClueDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{existingClue ? "Edit Clue" : "Add Clue"}</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: "var(--jeopardy-navy-light)",
+            borderRadius: "4px",
+            border: "none",
+          },
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          color: "var(--jeopardy-white)",
+        }}
+      >
+        {existingClue ? "Edit Clue" : "Add Clue"}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="flex flex-col gap-4">
           <Controller

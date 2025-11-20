@@ -56,13 +56,16 @@ export default function BoardEditorPage() {
   const { title } = board;
 
   return (
-    <Container maxWidth={false} className="py-6 px-6 h-[calc(100vh-80px)] flex flex-col overflow-auto">
+    <Container
+      maxWidth={false}
+      className="py-6 px-6 h-[calc(100vh-80px)] flex flex-col overflow-auto"
+    >
       <div className="mb-6 flex justify-between items-center flex-wrap gap-4">
-        <Typography 
-          variant="h3" 
-          component="h1" 
+        <Typography
+          variant="h3"
+          component="h1"
           className="font-bold"
-          sx={{ 
+          sx={{
             background: "linear-gradient(135deg, #f4c542 0%, #ffd966 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -73,8 +76,8 @@ export default function BoardEditorPage() {
         >
           {title}
         </Typography>
-        <Button 
-          variant="outlined" 
+        <Button
+          variant="outlined"
           onClick={() => router.back()}
           sx={{
             fontSize: "0.95rem",
@@ -93,13 +96,12 @@ export default function BoardEditorPage() {
         </Button>
       </div>
 
-      <div className="overflow-x-auto flex-1 pb-6">
+      <div className="overflow-x-auto flex-1 flex items-start justify-center pb-6">
         <div
-          className="board-grid mx-auto"
+          className="grid gap-3 mx-auto"
           style={{
-            gap: "10px",
             gridTemplateColumns: `repeat(6, minmax(150px, 1fr))`,
-            maxWidth: "1500px",
+            maxWidth: "1400px",
           }}
         >
           {categories.map((category, index) => (

@@ -260,11 +260,13 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
       onClose={handleBack}
       maxWidth="lg"
       fullWidth
-      PaperProps={{
-        sx: {
-          bgcolor: "var(--jeopardy-navy-light)",
-          borderRadius: "4px",
-          border: "none",
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: "var(--jeopardy-navy-light)",
+            borderRadius: "4px",
+            border: "none",
+          },
         },
       }}
     >
