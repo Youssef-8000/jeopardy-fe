@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useMemo } from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Container,
-} from "@mui/material";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Button, Typography, Container, Box } from "@mui/material";
 import { Board } from "@/lib/slices/boardsSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -24,6 +25,7 @@ export function PlayBoard({ board }: PlayBoardProps) {
   const dispatch = useAppDispatch();
   const currentClue = useAppSelector((state) => state.game.currentClue);
   const answeredClueIds = useAppSelector((state) => state.game.answeredClueIds);
+  const headerRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Sort categories by position and ensure we have 6 columns
   const sortedCategories = useMemo(() => {
@@ -116,7 +118,7 @@ export function PlayBoard({ board }: PlayBoardProps) {
       <Typography
         variant="h3"
         component="h1"
-        className="!mb-6 text-center font-bold"
+        className="mb-6! text-center font-bold"
         sx={{
           background: "linear-gradient(135deg, #f4c542 0%, #ffd966 100%)",
           WebkitBackgroundClip: "text",
@@ -141,35 +143,36 @@ export function PlayBoard({ board }: PlayBoardProps) {
             <div key={category.id} className="flex flex-col gap-3">
               {/* Category Header */}
               {category.title && (
-                <Card
+                <Box
+                  ref={(el: HTMLDivElement | null) => {
+                    headerRefs.current[String(category.id)] = el;
+                  }}
+                  className="p-4 text-center w-full"
                   sx={{
                     background: "#010b78",
-                    border: "none",
-                    boxShadow: "none",
                     borderRadius: "2px",
-                    minHeight: "80px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    height: `90px`,
+                    maxHeight: "120px",
+                    overflowY: "auto",
                   }}
                 >
-                  <CardContent className="!p-4 text-center">
-                    <Typography
-                      variant="subtitle1"
-                      className="font-bold"
-                      sx={{
-                        color: "#FFFFFF",
-                        fontSize: "1rem",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                      }}
-                    >
-                      {category.title}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                  <Typography
+                    variant="subtitle1"
+                    className="font-bold"
+                    sx={{
+                      color: "#FFFFFF",
+                      fontSize: "1rem",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {category.title}
+                  </Typography>
+                </Box>
               )}
 
               {/* Clue Cells */}

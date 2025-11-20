@@ -73,11 +73,8 @@ export function BoardCard({ board }: BoardCardProps) {
         </Box>
       </CardContent>
       <CardActions
-        className="!p-6 !pt-0"
         sx={{
           display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
         }}
       >
         <Link href={`/host/${board.id}`} className="w-full">

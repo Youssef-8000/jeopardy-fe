@@ -270,12 +270,15 @@ export function ClueDisplay({ onBack }: ClueDisplayProps) {
     >
       <DialogContent
         sx={{
+          minHeight: "80vh",
           p: { xs: 3, md: 4 },
           display: "flex",
           flexDirection: "column",
           gap: 3,
           background: "var(--jeopardy-navy-light)",
           position: "relative",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         {currentClue && (
