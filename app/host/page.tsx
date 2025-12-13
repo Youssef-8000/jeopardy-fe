@@ -61,7 +61,7 @@ export default function HostPage() {
 
       {boards.length === 0 ? (
         <div
-          className="text-center py-12 px-8 rounded-xl max-w-xl mx-auto flex-1 flex flex-col items-center justify-center"
+          className="text-center py-12 px-8 rounded-xl max-w-xl mx-auto flex-1 flex flex-col items-center justify-center max-h-[200px]"
           style={{
             background:
               "linear-gradient(145deg, rgba(26, 47, 74, 0.5) 0%, rgba(42, 63, 90, 0.3) 100%)",

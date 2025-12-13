@@ -28,10 +28,12 @@ export default function BoardEditorPage() {
     if (!board) return [];
 
     const existingCategories = [...board.categories];
+    console.log("existingCategories", existingCategories);
     const categoriesToShow: Category[] = [];
 
     for (let i = 0; i < NUM_CATEGORIES; i++) {
-      const existingCategory = existingCategories[i];
+      const category = existingCategories[i];
+      const existingCategory = existingCategories.find((c) => c.position === i);
       if (existingCategory) {
         categoriesToShow.push(existingCategory);
       } else {
@@ -40,11 +42,14 @@ export default function BoardEditorPage() {
           id: `placeholder-${i}`, // Temporary ID for React key
           title: "Click to add category",
           clues: [],
+          position: i,
         });
       }
     }
 
     categoriesToShow.sort((a, b) => (a.position || 0) - (b.position || 0));
+
+    console.log("categoriesToShow", categoriesToShow);
 
     return categoriesToShow;
   }, [board]);

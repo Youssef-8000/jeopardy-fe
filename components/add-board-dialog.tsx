@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,10 +8,11 @@ import {
   DialogActions,
   Button,
   TextField,
-} from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
-import { useAppDispatch } from '@/lib/hooks';
-import { addBoard } from '@/lib/slices/boardsSlice';
+} from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import { useAppDispatch } from "@/lib/hooks";
+import { createBoard } from "@/lib/slices/boardsSlice";
+import { toast } from "@/hooks/use-toast";
 
 interface AddBoardDialogProps {
   open: boolean;
@@ -20,36 +21,68 @@ interface AddBoardDialogProps {
 
 interface BoardFormData {
   title: string;
-  questionTimeLimit: number;
+  timeLimit: number;
 }
 
 export function AddBoardDialog({ open, onClose }: AddBoardDialogProps) {
   const dispatch = useAppDispatch();
   const { control, handleSubmit, reset } = useForm<BoardFormData>({
     defaultValues: {
-      title: '',
-      questionTimeLimit: 30,
+      title: "",
+      timeLimit: 30,
     },
   });
 
   const onSubmit = (data: BoardFormData) => {
-    dispatch(addBoard({
-      title: data.title,
-      questionTimeLimit: data.questionTimeLimit,
-    }));
-    reset();
-    onClose();
+    dispatch(
+      createBoard({
+        title: data.title,
+        timeLimit: data.timeLimit,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        reset();
+        onClose();
+      })
+      .catch((error) => {
+        toast({
+          title: "Error creating board",
+          description: error.message,
+          variant: "error",
+        });
+      });
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Create New Board</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: "var(--jeopardy-navy-light)",
+            borderRadius: "4px",
+            border: "none",
+          },
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          color: "var(--jeopardy-white)",
+        }}
+      >
+        Create New Board
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="flex flex-col gap-4">
           <Controller
             name="title"
             control={control}
-            rules={{ required: 'Board title is required' }}
+            rules={{ required: "Board title is required" }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -61,7 +94,7 @@ export function AddBoardDialog({ open, onClose }: AddBoardDialogProps) {
             )}
           />
           <Controller
-            name="questionTimeLimit"
+            name="timeLimit"
             control={control}
             rules={{ required: true, min: 5, max: 300 }}
             render={({ field }) => (

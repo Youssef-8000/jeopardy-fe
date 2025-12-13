@@ -8,8 +8,12 @@ import {
   Button,
   Typography,
   Box,
+  IconButton,
 } from "@mui/material";
-import { Board } from "@/lib/slices/boardsSlice";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Board, deleteBoardById } from "@/lib/slices/boardsSlice";
+import { useAppDispatch } from "@/lib/hooks";
+import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 interface BoardCardProps {
@@ -17,7 +21,33 @@ interface BoardCardProps {
 }
 
 export function BoardCard({ board }: BoardCardProps) {
+  const dispatch = useAppDispatch();
   const { title, timeLimit } = board;
+
+  const handleDelete = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this board? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    dispatch(deleteBoardById(board.id))
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Board deleted",
+          description: `"${title}" has been removed.`,
+          variant: "success",
+        });
+      })
+      .catch((error: any) => {
+        toast({
+          title: "Error deleting board",
+          description: error?.message || "Failed to delete board.",
+          variant: "error",
+        });
+      });
+  };
+
   return (
     <Card
       className="h-full flex flex-col"
@@ -29,6 +59,7 @@ export function BoardCard({ board }: BoardCardProps) {
         border: "1px solid rgba(244, 197, 66, 0.3)",
         boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
         transition: "all 0.3s ease",
+        position: "relative",
         "&:hover": {
           transform: "translateY(-4px)",
           borderColor: "rgba(244, 197, 66, 0.5)",
@@ -36,20 +67,38 @@ export function BoardCard({ board }: BoardCardProps) {
         },
       }}
     >
-      <CardContent className="flex-1 !p-6">
+      <CardContent className="flex-1 p-4!">
         <Box className="mb-4">
-          <Typography
-            variant="h5"
-            component="h3"
-            className="mb-3 font-bold"
-            sx={{
-              color: "#f4c542",
-              fontSize: "1.25rem",
-              textShadow: "0 2px 8px rgba(244, 197, 66, 0.2)",
-            }}
-          >
-            {title}
-          </Typography>
+          <Box className="flex items-center justify-between">
+            <Typography
+              variant="h5"
+              component="h3"
+              className="mb-3 font-bold"
+              sx={{
+                color: "#f4c542",
+                fontSize: "1.25rem",
+                textShadow: "0 2px 8px rgba(244, 197, 66, 0.2)",
+              }}
+            >
+              {title}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={handleDelete}
+              sx={{
+                color: "rgba(232, 236, 240, 0.9)",
+                backgroundColor: "rgba(0, 0, 0, 0.35)",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.55)",
+                  color: "#ff6666",
+                },
+                zIndex: 1,
+              }}
+              aria-label="Delete board"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Box>
           <Box
             className="flex items-center gap-2"
             sx={{

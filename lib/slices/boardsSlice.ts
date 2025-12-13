@@ -85,7 +85,7 @@ export const fetchBoardById = createAsyncThunk(
 export const createBoard = createAsyncThunk(
   "boards/createBoard",
   async (
-    boardData: { title: string; questionTimeLimit: number },
+    boardData: { title: string; timeLimit: number },
     { rejectWithValue }
   ) => {
     try {
@@ -127,6 +127,29 @@ export const updateBoard = createAsyncThunk(
           error.response?.data?.message ||
             error.message ||
             "Failed to update board"
+        );
+      }
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    }
+  }
+);
+
+export const deleteBoardById = createAsyncThunk(
+  "boards/deleteBoardById",
+  async (id: string | number, { rejectWithValue }) => {
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_JEOPARDY_SERVER}/board/${id}`
+      );
+      return id;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to delete board"
         );
       }
       return rejectWithValue(
@@ -372,16 +395,6 @@ const boardsSlice = createSlice({
     clearCurrentBoard: (state) => {
       state.currentBoard = null;
     },
-    addBoard: (
-      state,
-      action: PayloadAction<{ title: string; questionTimeLimit: number }>
-    ) => {
-      const newBoard = createPremadeBoard(
-        action.payload.title,
-        action.payload.questionTimeLimit
-      );
-      state.boards.push(newBoard);
-    },
     updateBoard: (state, action: PayloadAction<Board>) => {
       const index = state.boards.findIndex((b) => b.id === action.payload.id);
       if (index !== -1) {
@@ -521,6 +534,29 @@ const boardsSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Delete board
+    builder
+      .addCase(deleteBoardById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteBoardById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.boards = state.boards.filter(
+          (b) => String(b.id) !== String(action.payload)
+        );
+        if (
+          state.currentBoard &&
+          String(state.currentBoard.id) === String(action.payload)
+        ) {
+          state.currentBoard = null;
+        }
+      })
+      .addCase(deleteBoardById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
     // Create category
     builder
       .addCase(createCategory.pending, (state) => {
@@ -584,7 +620,6 @@ const boardsSlice = createSlice({
 });
 
 export const {
-  addBoard,
   updateBoard: updateBoardLocal,
   deleteBoard,
   addCategory,

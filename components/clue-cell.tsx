@@ -24,7 +24,7 @@ export function ClueCell({
   const isFilled =
     clue && clue.question.trim() !== "" && clue.answer.trim() !== "";
 
-  console.log("clue", clue);
+  console.log("categoryId", categoryId);
 
   return (
     <>
@@ -32,6 +32,7 @@ export function ClueCell({
         fullWidth
         onClick={() => setDialogOpen(true)}
         className="h-24 flex flex-col items-center justify-center relative"
+        disabled={categoryId.includes("placeholder-")}
         sx={{
           background: isFilled
             ? "#0A0EAF"
